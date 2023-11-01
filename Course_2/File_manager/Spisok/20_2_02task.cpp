@@ -8,10 +8,10 @@ typedef struct
 {
     int size;
     char *name;
-    char *absolute_path = NULL;
-    char *path = NULL;
-    char *cur_dir = NULL;
-    char *change_dir = NULL;
+    char *absolute_path;
+    char *path;
+    char *cur_dir;
+    char *change_dir;
 } Files_tree;
 
 Files_tree *fm = NULL;
