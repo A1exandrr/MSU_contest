@@ -5,7 +5,7 @@
 int main(int argc, char const *argv[])
 {
     //lasndalsjndkajsnda
-    char str[] = "root/file/search/main.txt/knkasdfj";
+    char str[] = "root/fil;l,;l,e/search/main.txt/knkasdfj";
     char *token = strtok(str, "/");
     while (token != NULL)
     {
