@@ -1,0 +1,4 @@
+SolvingBinom(file_input, file_output);
+            // закрытие файлов после работы
+            fclose(file_input);
+            fclose(file_output);
