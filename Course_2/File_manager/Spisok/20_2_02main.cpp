@@ -1,16 +1,17 @@
-#include "os_file.h"
 #include <iostream>
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-using namespace std;
+#include "20_2_02task.cpp"
+// using namespace std;
 
 int main()
 {
     file_manager_t fm;
     setup_file_manager(&fm);
-    fm.create(10);
+    fm.create(100);
+    // fm.create_dir("Main");
     // fm.destroy();
     // fm.create_dir();
     // fm.create_file();
