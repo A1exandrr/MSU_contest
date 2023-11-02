@@ -58,7 +58,7 @@ int ptr_create(int disk_size)
             node->size = disk_size;
             node->absolute_path = strdup("/");
             node->cur_dir = node->absolute_path;
-            fprintf(stdout, "%s", node->cur_dir);
+            fprintf(stdout, "%s\n", node->cur_dir);
             return 1;
         }
         else

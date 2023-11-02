@@ -1,5 +1,4 @@
 #include "20_2_02task.cpp"
-#include "os_file.h"
 #include <iostream>
 #include <memory.h>
 #include <stdio.h>
