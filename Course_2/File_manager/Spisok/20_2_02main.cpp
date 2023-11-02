@@ -1,12 +1,13 @@
+#include "20_2_02task.cpp"
+#include "os_file.h"
 #include <iostream>
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "20_2_02task.cpp"
-// using namespace std;
+using namespace std;
 
-int main()
+int main(int argc, char const *argv[])
 {
     file_manager_t fm;
     setup_file_manager(&fm);

@@ -10,10 +10,10 @@ default: all
 # Правило для компиляции программы
 all: myprogram
 
-myprogram: 20_2_02task.cpp
-	$(CC) $(CFLAGS) -o main_test 20_2_02task.cpp
-	./main_test
-	$(RM) main_test
+myprogram: 20_2_02main.cpp
+	$(CC) $(CFLAGS) -o main 20_2_02main.cpp
+	./main
+	$(RM) main
 #=========================================================
 
 #Это уже второстепенные точки запуска программы, для специальных вызывов
@@ -21,22 +21,22 @@ myprogram: 20_2_02task.cpp
 
 # Цель для запуска программы
 run: myprogram
-	./main_test input.txt output.txt
-	$(RM) main_test
+	./main input.txt output.txt
+	$(RM) main
 
 deb: myprogram
-	gdb ./main_test
-	$(RM) main_test
+	gdb ./main
+	$(RM) main
 
 run_p: myprogram
-	./main_test input.txt output.txt
-	$(RM) main_test
+	./main input.txt output.txt
+	$(RM) main
 
 
 deb_p: myprogram
-	gdb ./main_test input.txt output.txt
-	$(RM) main_test
+	gdb ./main input.txt output.txt
+	$(RM) main
 
 # Цель для очистки
 clean:
-	$(RM) main_test
+	$(RM) main

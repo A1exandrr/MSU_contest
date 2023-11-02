@@ -7,7 +7,6 @@ using namespace std;
 
 int main()
 {
-
     file_manager_t fm;
     setup_file_manager(&fm);
     fm.create(42069);
