@@ -1,20 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-struct Test
-{
-    int x;
-    int y;
-    int z;
-};
+#include <string.h>
 
 int main(int argc, char const *argv[])
 {
-    int n = 10;
-    int *p_n = &n;
-    fprintf(stdout, "%d\n", *p_n);
-    int m = 20;
-    p_n = &m;
-    fprintf(stdout, "%d\n", *p_n);
+    char *result;
+    char *str_1 = strdup("asdasd");
+    char *str_2 = strdup("laskdmlsak");
+    result = strdup(strcat(str_1, str_2));
+    fprintf(stdout, "%s", result);
     return 0;
 }

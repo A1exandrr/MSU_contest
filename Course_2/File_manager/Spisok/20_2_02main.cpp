@@ -11,7 +11,8 @@ int main(int argc, char const *argv[])
     file_manager_t fm;
     setup_file_manager(&fm);
     fm.create(100);
-    // fm.create_dir("Main");
+    fm.create_dir("Main");
+    fm.create_dir("test1");
     // fm.destroy();
     // fm.create_dir();
     // fm.create_file();

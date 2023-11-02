@@ -1,4 +1,3 @@
-// #include "os_file.h"
 #include "os_file.h"
 #include <iostream>
 #include <memory.h>
@@ -14,6 +13,7 @@ typedef struct Files_tree
     char *path;
     char *cur_dir;
     char *change_dir;
+    char *new_dir;
 } Files_tree;
 
 Files_tree *node = NULL;
@@ -22,7 +22,7 @@ Files_tree *node = NULL;
 //=================[ Прототипы основных функций ]=================
 int ptr_create(int disk_size);
 // int ptr_destroy();
-// int ptr_create_dir(const char *path);
+int ptr_create_dir(const char *path);
 // int ptr_create_file(const char *path, int file_size);
 // int ptr_remove(const char *path, int recursive);
 // int ptr_change_dir(const char *path);
@@ -39,7 +39,7 @@ void setup_file_manager(file_manager_t *fm)
 {
     fm->create = ptr_create;
     // fm->destroy = ptr_destroy;
-    // fm->create_dir = ptr_create_dir;
+    fm->create_dir = ptr_create_dir;
     // fm->create_file = ptr_create_file;
     // fm->remove = ptr_remove;
     // fm->change_dir = ptr_change_dir;
@@ -57,8 +57,9 @@ int ptr_create(int disk_size)
         {
             node->size = disk_size;
             node->absolute_path = strdup("/");
-            node->cur_dir = node->absolute_path;
+            node->cur_dir = strdup(node->absolute_path);
             fprintf(stdout, "%s\n", node->cur_dir);
+            fprintf(stdout, "%d\n", node->size);
             return 1;
         }
         else
@@ -70,4 +71,13 @@ int ptr_create(int disk_size)
         return 0;
     }
     return 2;
+}
+
+int ptr_create_dir(const char *path)
+{
+    node->new_dir = strdup(path);
+    node->new_dir = strdup(strcat(node->new_dir, "/"));
+    node->cur_dir = strdup(strcat(node->cur_dir, node->new_dir));
+    fprintf(stdout, "%s\n", node->cur_dir);
+    return 1;
 }
