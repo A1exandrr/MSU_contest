@@ -2,7 +2,7 @@
 # Основные флаги компиляции и запуска для работы программы
 CC      = g++
 #CONTEST = -fsanitize=address
-CFLAGS  = -Wall -g 
+CFLAGS  = -Wall -g
 RM      = rm -f
 
 # Цель по умолчанию
