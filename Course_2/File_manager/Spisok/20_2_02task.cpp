@@ -31,7 +31,7 @@ void ptr_get_cur_dir(char *dst);
 //=================================================================
 
 //=================[ Прототипы дополнительных функций ]=================
-int CheckDir();
+int Valid_name();
 void C_DoubleList();
 //======================================================================
 
@@ -71,26 +71,27 @@ int ptr_create(int disk_size)
 
 int ptr_create_dir(const char *path)
 {
+
     if (strcmp(node->cur_dir, node->absolute_path) == 0)
     {
-       node->new_dir = strdup(path);
-       
+        node->new_dir = strdup(path);
+        node->cur_dir = strdup(strcat(node->cur_dir, node->new_dir));
+        return 1;
+    }
+    else{
+        if(s)
     }
 
     // node->new_dir = strdup(path);
     // node->new_dir = strdup(strcat(node->new_dir, "/"));
     // node->cur_dir = strdup(strcat(node->cur_dir, node->new_dir));
-    return 1;
+    return 0;
 }
 
 void ptr_get_cur_dir(char *dst)
 {
     dst = strdup(node->cur_dir);
     fprintf(stdout, "%s\n", dst);
-}
-
-int CheckDir()
-{
 }
 
 void C_DoubleList()
