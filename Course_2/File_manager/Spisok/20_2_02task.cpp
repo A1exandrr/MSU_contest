@@ -16,7 +16,9 @@ typedef struct Files_tree
     char *new_dir;
 } Files_tree;
 
-Files_tree *node = NULL;
+Files_tree *f_tree = NULL;
+
+typedef struct 
 //============================================================================
 
 //=================[ Прототипы основных функций ]=================
@@ -53,12 +55,12 @@ int ptr_create(int disk_size)
 {
     if (disk_size >= 0)
     {
-        node = (Files_tree *)malloc(sizeof(Files_tree));
-        if (node != NULL)
+        f_tree = (Files_tree *)malloc(sizeof(Files_tree));
+        if (f_tree != NULL)
         {
-            node->size = disk_size;
-            node->absolute_path = strdup("/");
-            node->cur_dir = strdup(node->absolute_path);
+            f_tree->size = disk_size;
+            f_tree->absolute_path = strdup("/");
+            f_tree->cur_dir = strdup(f_tree->absolute_path);
             return 1;
         }
         else
@@ -72,25 +74,25 @@ int ptr_create(int disk_size)
 int ptr_create_dir(const char *path)
 {
 
-    if (strcmp(node->cur_dir, node->absolute_path) == 0)
+    if (strcmp(f_tree->cur_dir, f_tree->absolute_path) == 0)
     {
-        node->new_dir = strdup(path);
-        node->cur_dir = strdup(strcat(node->cur_dir, node->new_dir));
+        f_tree->new_dir = strdup(path);
+        f_tree->cur_dir = strdup(strcat(f_tree->cur_dir, f_tree->new_dir));
         return 1;
     }
     else{
         if(s)
     }
 
-    // node->new_dir = strdup(path);
-    // node->new_dir = strdup(strcat(node->new_dir, "/"));
-    // node->cur_dir = strdup(strcat(node->cur_dir, node->new_dir));
+    // f_tree->new_dir = strdup(path);
+    // f_tree->new_dir = strdup(strcat(f_tree->new_dir, "/"));
+    // f_tree->cur_dir = strdup(strcat(f_tree->cur_dir, f_tree->new_dir));
     return 0;
 }
 
 void ptr_get_cur_dir(char *dst)
 {
-    dst = strdup(node->cur_dir);
+    dst = strdup(f_tree->cur_dir);
     fprintf(stdout, "%s\n", dst);
 }
 
