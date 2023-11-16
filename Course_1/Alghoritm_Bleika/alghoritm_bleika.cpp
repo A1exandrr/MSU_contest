@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int CheckFile(FILE *file_check);   // проверка на открытие файлов
-void Bleik(FILE *fin, FILE *fout); // Реализация блейка
+int CheckFile(FILE *file_check);                // проверка на открытие файлов
+void Bleik(FILE *fin, FILE *fout);              // Реализация блейка
 void Input(FILE *fin, int **arr, int l, int c); // считывание последовательностей из файла
 void ShortenedDNF(int **arr, int *p_c, int l); // процесс склевания наборов(обобщенная функция)
 int PossibilityGluing(int **arr, int l, int i, int j); // проверка на возможность склеивания
@@ -119,7 +119,7 @@ int Memory(int ***arr, int l, int step)
 void Input(FILE *fin, int **arr, int l, int c)
 {
     char tmp;
-    int flag = 0;//чтобы избежать мусора в входном файле
+    int flag = 0; // чтобы избежать мусора в входном файле
     for (int i = 0; i < c;)
     {
         flag = 0;
@@ -176,21 +176,7 @@ int PossibilityGluing(int **arr, int l, int i, int j)
             gap++;
     }
     if (gap == 1)
-    {
-        fprintf(stdout, "You can gluing: ");
-        for (int a = 0; a < l; a++)
-        {
-            fprintf(stdout, "%d", arr[i][a]);
-        }
-        fprintf(stdout, " and ");
-
-        for (int a = 0; a < l; a++)
-        {
-            fprintf(stdout, "%d", arr[j][a]);
-        }
-        fprintf(stdout, "\n");
         return 1;
-    }
     return 0;
 }
 // процесс склевания
@@ -209,12 +195,6 @@ void Gluing(int **arr, int index, int l, int i, int j)
         if (arr[i][m] != arr[j][m] && arr[i][m] != 2 && arr[j][m] == 2)
             arr[index][m] = arr[i][m];
     }
-    fprintf(stdout, "New element is: ");
-    for (int a = 0; a < l; a++)
-    {
-        fprintf(stdout, "%d", arr[index][a]);
-    }
-    fprintf(stdout, "\n");
 }
 
 // проверка на наличие монома
