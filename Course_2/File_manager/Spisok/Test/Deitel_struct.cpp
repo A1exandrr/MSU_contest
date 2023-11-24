@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct First_struct
+typedef struct
 {
     int data;
     int *p_data;
     char name;
-} f_struct;
+} F_struct;
 
-f_struct *pointer;
-f_struct man;
+F_struct *pointer;
+F_struct man;
 
 int main(int argc, char const *argv[])
 {

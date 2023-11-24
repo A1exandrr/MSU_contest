@@ -1,18 +1,12 @@
 #=========================================================
 # Основные флаги компиляции и запуска для работы программы
 CC      = g++
-#CONTEST = -fsanitize=address
+CONTEST = -fsanitize=address
 CFLAGS  = -Wall -g
 RM      = rm -f
 
-# Цель по умолчанию
-default: all
-
-# Правило для компиляции программы
-all: myprogram
-
 myprogram: 20_2_02main.cpp
-	$(CC) $(CFLAGS) -o main 20_2_02main.cpp
+	$(CC) $(CFLAGS) -o main 20_2_02main.cpp $(CONTEST)
 	./main
 	$(RM) main
 #=========================================================
@@ -29,14 +23,10 @@ deb: myprogram
 	gdb ./main
 	$(RM) main
 
-run_p: myprogram
-	./main input.txt output.txt
-	$(RM) main
-
-
-deb_p: myprogram
-	gdb ./main input.txt output.txt
-	$(RM) main
+memory: 20_2_02main.cpp
+		$(CC) $(CFLAGS) -o main 20_2_02main.cpp
+		valgrind --leak-check=full ./main
+		$(RM) main
 
 # Цель для очистки
 clean:

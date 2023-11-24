@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 //===========================[ Основные структуры ]===========================
-typedef struct Files_tree
+typedef struct
 {
     int size;
     char *name;
@@ -18,7 +18,6 @@ typedef struct Files_tree
 
 Files_tree *f_tree = NULL;
 
-typedef struct 
 //============================================================================
 
 //=================[ Прототипы основных функций ]=================
@@ -81,7 +80,7 @@ int ptr_create_dir(const char *path)
         return 1;
     }
     else{
-        if(s)
+        
     }
 
     // f_tree->new_dir = strdup(path);
