@@ -14,6 +14,8 @@ int main(int argc, char const *argv[])
     fm.create(100);
     fm.create_dir("Main");
     fm.create_dir("/Main/test1");
+    fm.create_dir("/Main/test1/test2");
+    fm.change_dir("/Main/test1/test2/..");
     // fm.destroy();
     // fm.create_file();
     // fm.remove();
