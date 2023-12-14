@@ -14,7 +14,7 @@ void Sort(int **arr, int *p_c, int l);                  // Сортировка 
 int Convert(int *arr, int l); // перевод в троичный вид для сортировки
 int Pow(int base, int exponent); // возведение в степень, ибо pow может вызвать погрешность
 void Output(FILE *fout, int **arr, int *p_c, int l); // запись ответа
-int Memory(int ***arr, int l, int step);             // выделение памяти для массивов
+int Memory(int ***arr, int l, int amount);           // выделение памяти для массивов
 void Clean(int ***arr, int count); // чистка выделенной памяти для указателей
 
 int main(int argc, char const *argv[])
@@ -43,9 +43,7 @@ int main(int argc, char const *argv[])
             }
         }
         else
-        {
             return 1;
-        }
     }
     else
     {
@@ -71,27 +69,26 @@ void Bleik(FILE *fin, FILE *fout)
     int l = 0;                    // длина конъюнктов
     int c = 0;                    // количество конъюнктов
     fscanf(fin, "%d %d", &l, &c); // считывание первых двух чисел в файле
-    int step = c * l;             // размерность массива
-    int memory = (step + c) * 5;  // размерность памяти необходмиой для массива
+    int amount = c * l;           // размерность памяти необходмиой для массива
     int **arr = NULL; // массив для записи последовательности из файла
     int *p_c = &c;
-    if (Memory(&arr, l, memory))
+    if (Memory(&arr, l, amount))
     {
         Input(fin, arr, l, c);
         ShortenedDNF(arr, p_c, l);
         Sort(arr, p_c, l);
         Output(fout, arr, p_c, l);
-        Clean(&arr, memory);
+        Clean(&arr, amount);
     }
     else
         fprintf(stdout, "Please, fix all problems\n");
 }
 
 // выделение памяти для указателей
-int Memory(int ***arr, int l, int step)
+int Memory(int ***arr, int l, int amount)
 {
     // выделение памяти для двумерного массива
-    (*arr) = (int **)calloc(step, sizeof(int *));
+    (*arr) = (int **)calloc(amount, sizeof(int *));
     if (arr == NULL)
     {
         fprintf(stdout, "Error with memory for arr pointer\n");
@@ -99,7 +96,7 @@ int Memory(int ***arr, int l, int step)
     }
 
     // выделение памяти под каждую строку + проверка корректности
-    for (int i = 0; i < step; i++)
+    for (int i = 0; i < amount; i++)
     {
         (*arr)[i] = (int *)calloc(l, sizeof(int));
 
@@ -119,36 +116,30 @@ int Memory(int ***arr, int l, int step)
 void Input(FILE *fin, int **arr, int l, int c)
 {
     char tmp;
-    int flag = 0; // чтобы избежать мусора в входном файле
-    for (int i = 0; i < c;)
+    for (int i = 0; i < l; i++)
     {
-        flag = 0;
-        for (int j = 0; j < l; j++)
+        for (int j = 0; j < c; j++)
         {
             fscanf(fin, "%c", &tmp);
             if (tmp == '0' || tmp == '1' || tmp == '*')
             {
-                flag = 1;
                 if (tmp == '1')
                     arr[i][j] = 1;
                 if (tmp == '*')
-                    arr[i][j] = 2; // замена * на 2, чтобы упростить работу
+                    arr[i][j] = 2;
             }
             else
-                break;
+                j--;
         }
-        if (flag)
-            i++;
     }
 }
-
 // склеивание(обощенная функция)
 void ShortenedDNF(int **arr, int *p_c, int l)
 {
     int index = *p_c - 1;
     for (int i = 0; i < *p_c; i++)
     {
-        for (int j = i + 1; j < *p_c && i != j; j++)
+        for (int j = i + 1; j < *p_c; j++)
         {
             if (PossibilityGluing(arr, l, i, j))
             {
