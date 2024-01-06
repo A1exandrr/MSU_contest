@@ -146,7 +146,7 @@ int Memory(int ***arr, int l, int step)
     return 1;
 }
 
-// Функция возведения в степень(сделано чтобы не было ошибок)
+// Функция возведения в степенnullь(сделано чтобы не было ошибок)
 int Pow(int base, int exponent)
 {
     int result = 1;

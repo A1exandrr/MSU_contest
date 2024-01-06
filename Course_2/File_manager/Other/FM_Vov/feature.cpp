@@ -799,7 +799,7 @@ int main()
     setup_file_manager(&fm);
 
     // t2.1
-    cout << (fm.create(1000000) == 1) << endl;                       //, passed
+    cout << (fm.create(1000000) == 1) << endl;                    //, passed
     cout << (fm.create_file("test_file", 1000 + 1) == 0) << endl; //, passed
     cout << (fm.destroy() == 1) << endl;                          //, passed
     cout << (fm.destroy() == 0) << endl;                          //, passed

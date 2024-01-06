@@ -3,16 +3,14 @@
 CC       = g++
 CFLAGS   = -Wall -g
 ASan	 = -fsanitize=address
-VALGRIND = valgrind --leak-check=full --show-leak-kinds=all
+VALGRIND-leak-check = valgrind --leak-check=full --show-leak-kinds=all
+VALGRIND-variable-null= valgrind --leak-check=full --track-origins=yes --show-reachable=yes
 RM       = rm -f
 
 # Цель по умолчанию
 default: main
 
-# Правило для компиляции программы
-main: program
-
-program: 20_2_02main.cpp
+main: 20_2_02main.cpp
 	$(CC) $(CFLAGS) -o main 20_2_02main.cpp
 	./main
 	$(RM) main
@@ -28,8 +26,15 @@ contest: 20_2_02main.cpp
 	./main
 	$(RM) main
 
-#Для проверки работы программы с памятью через valgrind
-valgrind: 20_2_02main.cpp
+#Каждая отдельная утечка будет показана подробно и
+#Показать все «определенные, косвенные, возможные, достижимые» виды утечек в «полном» отчете.
+leak_check: 20_2_02main.cpp
 	$(CC) $(CFLAGS) -o main 20_2_02main.cpp
-	$(VALGRIND) ./main
+	$(VALGRIND-leak-check) ./main
+	$(RM) main
+
+#
+variable_null: 20_2_02main.cpp
+	$(CC) $(CFLAGS) -o main 20_2_02main.cpp
+	$(VALGRIND-leak-check) ./main
 	$(RM) main
