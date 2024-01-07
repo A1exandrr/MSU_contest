@@ -16,7 +16,7 @@ void freePathInfo(PathInfo *pathInfo);
 void freeLinkedList(LinkedList *list);
 void freeNode(Node *node);
 Node *popFront(LinkedList *list);
-int is_valid_path(char *path);
+int is_valid_path(const char *path);
 char *get_last_component(const char *path);
 Node *find_child_by_name(Node *parent, const char *name);
 int is_contains(LinkedList *children, const char *name);
@@ -29,6 +29,7 @@ void freeNode(Node *node);
 char *concatPaths(const char *path1, const char *path2);
 Node *createNode(const char *name, Node *parent, int is_dir);
 void pushBack(LinkedList *list, Node *node);
+int navigate_path(const char *path, Node **result_node);
 //=================[ Prototypes of main functions ]==================
 int ptr_create(int disk_size);
 int ptr_destroy();
@@ -45,7 +46,7 @@ void setup_file_manager(file_manager_t *fm)
 {
     fm->create = ptr_create;
     fm->destroy = ptr_destroy;
-    // fm->create_dir = ptr_create_dir;
+    fm->create_dir = ptr_create_dir;
     // fm->create_file = ptr_create_file;
     // fm->remove = ptr_remove;
     // fm->change_dir = ptr_change_dir;
@@ -152,38 +153,38 @@ int ptr_create_dir(const char *path)
         return 0;
     }
 
-    char *token = strdup(path);
-
     // Проверяем, что путь является абсолютным или относительным
-    if (!is_valid_path(token))
+    // int result = is_valid_path(path);
+    // if (!result)
+    // {
+        // fprintf(stderr, "Invalid path: %s\n", path);
+        // return 0;
+    // }
+
+    Node *parent;
+
+    if (path[0] == '/') // Если путь абсолютный
     {
-        fprintf(stderr, "Invalid path: %s\n", path);
-        return 0;
+        if (!navigate_path(path, &parent) || !parent->is_dir)
+        {
+            fprintf(stderr, "Parent directory does not exist.\n");
+            return 0;
+        }
+    }
+    else // Если путь относительный
+    {
+        // Используйте текущую директорию (cur_dir) в качестве родителя
+        parent = cur_dir;
     }
 
-    // Если необходимо создать корневую директорию
-    if (strcmp(path, "/") == 0)
-    {
-        fprintf(stderr, "Root directory already exists.\n");
-        return 0;
-    }
-
-    // Проверяем, что директория существует
     char *parent_path = strdup(path);
     char *dir_name = get_last_component(parent_path);
 
     if (!parent_path || !dir_name)
     {
         free(parent_path);
+        free(dir_name);
         fprintf(stderr, "Memory allocation error.\n");
-        return 0;
-    }
-
-    // Проверяем, что родительская директория существует
-    Node *parent;
-    if (!navigate_path(path, &parent) || !parent->is_dir)
-    {
-        fprintf(stderr, "Parent directory does not exist.\n");
         return 0;
     }
 
@@ -207,7 +208,7 @@ int ptr_create_dir(const char *path)
     return 1;
 }
 
-int is_valid_path(char *path)
+int is_valid_path(const char *path)
 {
     char arr[] = "!/\\,{}[]<>@#$%^&*()+|'\"?~`*+=";
     if (!path || strlen(path) > 32 || !strcmp(path, "") || (*path == '.' && path[strlen(path) - 1] == '.'))
@@ -263,17 +264,14 @@ char *get_last_component(const char *path)
 
 int navigate_path(const char *path, Node **result_node)
 {
-    char *token = strdup(path);
-    if (!token || !is_valid_path(token))
+    if (!path || !is_valid_path(path))
     {
-        free(token);
         return 0;
     }
 
-    char *last_component = get_last_component(token);
+    char *last_component = get_last_component(path);
     if (!last_component)
     {
-        free(token);
         return 0;
     }
 
@@ -281,7 +279,6 @@ int navigate_path(const char *path, Node **result_node)
 
     // Освобождаем память, выделенную для last_component и token
     free(last_component);
-    free(token);
 
     if (child && result_node)
     {
@@ -355,7 +352,7 @@ Node *createNode(const char *name, Node *parent, int is_dir)
     node->children = createLinkedList();
     node->next = NULL;
 
-    // Создание пути для нового узла
+    // Инициализация пути для нового узла
     if (parent)
     {
         const char *parent_path = parent->pathInfo->absolutePath;
