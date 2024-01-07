@@ -85,11 +85,15 @@ int ptr_create(int disk_size)
 
 int ptr_create_dir(const char *path)
 {
-    int res_1 = 0;
+    int flag = 0;
     char *rest = strdup(path);
     char *token = NULL;
+
     while ((token = strtok_r(rest, "/", &rest)))
-        res_1 = valid_name(token);
+        if (valid_name(token) && valid_path(rest, token))
+            flag = 1;
+        else
+            return 0;
     var_m.disk_space--;
 
     fprintf(stdout, "Disk space after creating new folder: %d\n", var_m.disk_space);
@@ -171,8 +175,24 @@ node_manager *new_node(char name)
     return new_node;
 }
 
-int valid_path(const char *path)
+int valid_path(const char *path, const char *name)
 {
+    if (path[0] == '/')
+    {
+        for (; root != NULL; root = root->children->next)
+        {                         // scan the siblings' list
+            if (root->child == name) // test the current node
+                return 1;      // return it if the value found
+
+            if (root->child != NULL)
+            { // scan a subtree
+                valid_path(root->child->, key);
+                if (result)        // the value found in a subtree
+                    return result; // abandon scanning, return the node found
+            }
+        }
+        return 0; // key not found
+    }
 }
 
 int valid_name(const char *name)
