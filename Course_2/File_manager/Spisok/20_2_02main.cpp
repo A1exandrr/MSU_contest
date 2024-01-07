@@ -18,7 +18,7 @@ int main(int argc, char const *argv[])
     // fm.create_dir("/Main/test1");
     // fm.create_dir("/Main/test1/test2");
     // fm.change_dir("/Main/test1/test2/..");
-    // fprintf(stdout, "Result of destroing: %d\n", fm.destroy());
+    fprintf(stdout, "Result of destroing: %d\n", fm.destroy());
     // fm.create_file();
     // fm.remove();
     // fm.change_dir();

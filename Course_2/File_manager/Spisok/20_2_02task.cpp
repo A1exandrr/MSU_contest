@@ -20,15 +20,15 @@ int is_valid_path(char *path);
 char *get_last_component(const char *path);
 Node *find_child_by_name(Node *parent, const char *name);
 int is_contains(LinkedList *children, const char *name);
-Node *createNode(const char *name, int is_dir);
+Node *createNode(const char *name, Node *parent, int is_dir);
 Node *popFront(LinkedList *list);
 void deleteNode(Node *node);
 void freePathInfo(PathInfo *pathInfo);
 void freeLinkedList(LinkedList *list);
 void freeNode(Node *node);
-Node *createNode(const char *name, int is_dir);
 char *concatPaths(const char *path1, const char *path2);
 Node *createNode(const char *name, Node *parent, int is_dir);
+void pushBack(LinkedList *list, Node *node);
 //=================[ Prototypes of main functions ]==================
 int ptr_create(int disk_size);
 int ptr_destroy();
@@ -144,7 +144,7 @@ PathInfo *createPathInfo(const char *absolutePath, const char *relativePath)
     return pathInfo;
 }
 
-int create_dir(const char *path)
+int ptr_create_dir(const char *path)
 {
     if (!root)
     {
@@ -407,30 +407,19 @@ void pushBack(LinkedList *list, Node *node)
         return;
     }
 
-    // Создаем новый элемент списка
-    Node *newNode = (Node *)malloc(sizeof(Node));
-    if (!newNode)
-    {
-        perror("Memory allocation error");
-        exit(EXIT_FAILURE);
-    }
-
-    newNode->_node = node;
-    newNode->next = NULL;
-
     // Если список пуст, новый элемент становится и головой, и хвостом
     if (list->size == 0)
     {
-        list->head = newNode;
-        list->tail = newNode;
-        newNode->prev = NULL;
+        list->head = node;
+        list->tail = node;
+        node->next = NULL;
     }
     else
     {
         // Иначе добавляем элемент в конец списка
-        newNode->prev = list->tail;
-        list->tail->next = newNode;
-        list->tail = newNode;
+        list->tail->next = node;
+        list->tail = node;
+        node->next = NULL;
     }
 
     // Увеличиваем размер списка
