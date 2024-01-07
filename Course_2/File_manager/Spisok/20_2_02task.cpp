@@ -149,16 +149,16 @@ int ptr_create_dir(const char *path)
 {
     if (!root)
     {
-        fprintf(stderr, "File manager is not created.\n");
-        return 0;
+        // Инициализация корневого узла, если он еще не создан
+        root = createNode("/", NULL, 1);
     }
 
     // Проверяем, что путь является абсолютным или относительным
     // int result = is_valid_path(path);
     // if (!result)
     // {
-        // fprintf(stderr, "Invalid path: %s\n", path);
-        // return 0;
+    //     fprintf(stderr, "Invalid path: %s\n", path);
+    //     return 0;
     // }
 
     Node *parent;
@@ -173,8 +173,8 @@ int ptr_create_dir(const char *path)
     }
     else // Если путь относительный
     {
-        // Используйте текущую директорию (cur_dir) в качестве родителя
-        parent = cur_dir;
+        // Используйте корневой узел в качестве родителя
+        parent = root;
     }
 
     char *parent_path = strdup(path);
@@ -185,6 +185,15 @@ int ptr_create_dir(const char *path)
         free(parent_path);
         free(dir_name);
         fprintf(stderr, "Memory allocation error.\n");
+        return 0;
+    }
+
+    // Проверяем, что родительская директория существует
+    if (!parent || !parent->is_dir)
+    {
+        fprintf(stderr, "Parent directory does not exist.\n");
+        free(parent_path);
+        free(dir_name);
         return 0;
     }
 
