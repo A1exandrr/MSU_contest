@@ -19,14 +19,16 @@ Node *popFront(LinkedList *list);
 int is_valid_path(char *path);
 char *get_last_component(const char *path);
 Node *find_child_by_name(Node *parent, const char *name);
-int is_contains(Node *parent, const char *name);
+int is_contains(LinkedList *children, const char *name);
+Node *createNode(const char *name, int is_dir);
 Node *popFront(LinkedList *list);
 void deleteNode(Node *node);
 void freePathInfo(PathInfo *pathInfo);
 void freeLinkedList(LinkedList *list);
 void freeNode(Node *node);
 Node *createNode(const char *name, int is_dir);
-
+char *concatPaths(const char *path1, const char *path2);
+Node *createNode(const char *name, Node *parent, int is_dir);
 //=================[ Prototypes of main functions ]==================
 int ptr_create(int disk_size);
 int ptr_destroy();
@@ -331,7 +333,7 @@ int is_contains(LinkedList *children, const char *name)
     return 0; // Узел с указанным именем не найден
 }
 
-Node *createNode(const char *name, int is_dir)
+Node *createNode(const char *name, Node *parent, int is_dir)
 {
     Node *node = (Node *)malloc(sizeof(Node));
     if (!node)
@@ -349,12 +351,90 @@ Node *createNode(const char *name, int is_dir)
     }
 
     node->is_dir = is_dir;
-    node->parent = NULL;
+    node->parent = parent;
     node->children = createLinkedList();
     node->next = NULL;
-    node->pathInfo = NULL; // Не забудьте про пути
+
+    // Создание пути для нового узла
+    if (parent)
+    {
+        const char *parent_path = parent->pathInfo->absolutePath;
+        const char *relative_path = parent->pathInfo->relativePath;
+        node->pathInfo = createPathInfo(concatPaths(parent_path, name), concatPaths(relative_path, name));
+    }
+    else
+    {
+        // Для корневого узла
+        node->pathInfo = createPathInfo(strdup(name), strdup(name));
+    }
 
     return node;
+}
+
+char *concatPaths(const char *path1, const char *path2)
+{
+    size_t len1 = strlen(path1);
+    size_t len2 = strlen(path2);
+
+    // Выделяем память для объединенного пути
+    char *result = (char *)malloc(len1 + len2 + 2); // +2 для разделителя и завершающего нуля
+
+    if (!result)
+    {
+        perror("Memory allocation error");
+        exit(EXIT_FAILURE);
+    }
+
+    // Копируем первую часть пути
+    strcpy(result, path1);
+
+    // Добавляем разделитель, если нужно
+    if (len1 > 0 && path1[len1 - 1] != '/')
+    {
+        strcat(result, "/");
+    }
+
+    // Добавляем вторую часть пути
+    strcat(result, path2);
+
+    return result;
+}
+
+void pushBack(LinkedList *list, Node *node)
+{
+    if (!list || !node)
+    {
+        return;
+    }
+
+    // Создаем новый элемент списка
+    Node *newNode = (Node *)malloc(sizeof(Node));
+    if (!newNode)
+    {
+        perror("Memory allocation error");
+        exit(EXIT_FAILURE);
+    }
+
+    newNode->_node = node;
+    newNode->next = NULL;
+
+    // Если список пуст, новый элемент становится и головой, и хвостом
+    if (list->size == 0)
+    {
+        list->head = newNode;
+        list->tail = newNode;
+        newNode->prev = NULL;
+    }
+    else
+    {
+        // Иначе добавляем элемент в конец списка
+        newNode->prev = list->tail;
+        list->tail->next = newNode;
+        list->tail = newNode;
+    }
+
+    // Увеличиваем размер списка
+    list->size++;
 }
 
 int ptr_destroy()
