@@ -5,8 +5,8 @@
 #include <string.h>
 using namespace std;
 
-static int VALUE_MAX_LENGTH = 32;
-static int ABSOLUTE_PATH_MAX_LEN = 128;
+// static int VALUE_MAX_LENGTH = 32;
+// static int ABSOLUTE_PATH_MAX_LEN = 128;
 
 int main(int argc, char const *argv[])
 {
@@ -14,11 +14,11 @@ int main(int argc, char const *argv[])
     file_manager_t fm;
     setup_file_manager(&fm);
     fprintf(stdout, "Result create: %d\n", fm.create(100));
-    fprintf(stdout, "Result of creating folders %d\n", fm.create_dir("Main"));
+    fprintf(stdout, "Result of creating folders %d\n", fm.create_dir("/Main"));
     // fm.create_dir("/Main/test1");
     // fm.create_dir("/Main/test1/test2");
     // fm.change_dir("/Main/test1/test2/..");
-    fprintf(stdout, "Result of destroing: %d\n", fm.destroy());
+    // fprintf(stdout, "Result of destroing: %d\n", fm.destroy());
     // fm.create_file();
     // fm.remove();
     // fm.change_dir();

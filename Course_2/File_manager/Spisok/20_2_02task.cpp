@@ -4,16 +4,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-//=================[  Prototypes of additional functions ]==================
-void Create_node(int disk_size);
-void Def_initVariables(int disk_size);
-void Add_child(const char *path);
-// void Garbage_collection();
-int Check_operation(char *path);
-int valid_path(const char *path);
-int valid_name(const char *name);
+// Forward declarations
+typedef struct Node Node;
+typedef struct LinkedList LinkedList;
+typedef struct PathInfo PathInfo;
 
-//==========================================================================
+LinkedList *createLinkedList();
+PathInfo *createPathInfo(const char *absolutePath, const char *relativePath);
+void deleteNode(Node *node);
+void freePathInfo(PathInfo *pathInfo);
+void freeLinkedList(LinkedList *list);
+void freeNode(Node *node);
+Node *popFront(LinkedList *list);
+int is_valid_path(char *path);
+char *get_last_component(const char *path);
+Node *find_child_by_name(Node *parent, const char *name);
+int is_contains(Node *parent, const char *name);
+Node *popFront(LinkedList *list);
+void deleteNode(Node *node);
+void freePathInfo(PathInfo *pathInfo);
+void freeLinkedList(LinkedList *list);
+void freeNode(Node *node);
+Node *createNode(const char *name, int is_dir);
 
 //=================[ Prototypes of main functions ]==================
 int ptr_create(int disk_size);
@@ -24,220 +36,404 @@ int ptr_create_dir(const char *path);
 // int ptr_change_dir(const char *path);
 // void ptr_get_cur_dir(char *dst);
 // int ptr_list(const char *path, int dir_first);
-//=================================================================
+//===================================================================
 
 //=================[ Prototypes of functions  ]==================
 void setup_file_manager(file_manager_t *fm)
 {
     fm->create = ptr_create;
     fm->destroy = ptr_destroy;
-    fm->create_dir = ptr_create_dir;
+    // fm->create_dir = ptr_create_dir;
     // fm->create_file = ptr_create_file;
     // fm->remove = ptr_remove;
     // fm->change_dir = ptr_change_dir;
     // fm->get_cur_dir = ptr_get_cur_dir;
     // fm->list = ptr_list;
 }
-//========================================================
+//================================================================
 
-//=================[ Struct for work with manager nodes  ]=================
-typedef struct node_manager
+// Node structure
+struct Node
 {
-    int c_children, disk_space;    // Reconsider if you need these
-                                   //   for maintenance effort versus benefit
-    struct node_manager *children; // point to children of this node
-    struct node_manager *next;     // point to next node at same level
-    struct node_manager *previous; // point to previos node at same level
-    struct node_files *file;
-    char *cur_path;
-    char *child;
-} node_manager;
-node_manager *root = NULL;
-node_manager var_m;
-//========================================================
+    size_t disk_space;
+    Node *parent;
+    LinkedList *children;
+    Node *next;
+    PathInfo *pathInfo;
+    char *name;
+    int is_dir;
+};
+
+// LinkedList structure
+struct LinkedList
+{
+    int size;
+    Node *head;
+    Node *tail;
+};
+
+// PathInfo structure
+struct PathInfo
+{
+    char *absolutePath;
+    char *relativePath;
+};
+
+// Global variables
+Node *root = NULL;
+Node *cur_dir = NULL;
 
 //=================[ Struct for work with files and path ]=================
-typedef struct node_files
-{
-    char *name[32];
-    char *absolute_path[128];
-    char *relative_path;
-} node_files;
-//========================================================
 
-//========================================================
-
-//=================[ Realization of main functions ]=================
 int ptr_create(int disk_size)
 {
-    if (disk_size > 0)
+    if (disk_size > 0 && !root)
     {
-        // Добавить проверку на корректное выделение памяти
-        Create_node(disk_size);
+        root = (Node *)malloc(sizeof(Node));
+        if (!root)
+        {
+            perror("Memory allocation error");
+            exit(EXIT_FAILURE);
+        }
+
+        root->children = createLinkedList();
+        root->is_dir = 1;
+        root->parent = NULL;
+        root->pathInfo = createPathInfo("/", ""); // корневая директория
+        cur_dir = root;
+        root->name = root->pathInfo->absolutePath;
+        root->disk_space = disk_size;
+
+        fprintf(stdout, "Root: %s\n", root->name);
+        fprintf(stdout, "Relative path: %s\n", root->pathInfo->relativePath);
+        fprintf(stdout, "Disk space: %zu\n", root->disk_space);
         return 1;
     }
-    else
-    {
-        perror("Incorrect disk size");
-        return 0;
-    }
+    return 0;
 }
 
-int ptr_create_dir(const char *path)
+LinkedList *createLinkedList()
 {
-    int flag = 0;
-    char *rest = strdup(path);
-    char *token = NULL;
+    LinkedList *list = (LinkedList *)malloc(sizeof(LinkedList));
+    if (!list)
+    {
+        perror("Memory allocation error");
+        exit(EXIT_FAILURE);
+    }
+    list->size = 0;
+    list->head = NULL;
+    list->tail = NULL;
 
-    while ((token = strtok_r(rest, "/", &rest)))
-        if (valid_name(token) && valid_path(rest, token))
-            flag = 1;
-        else
+    return list;
+}
+
+PathInfo *createPathInfo(const char *absolutePath, const char *relativePath)
+{
+    PathInfo *pathInfo = (PathInfo *)malloc(sizeof(PathInfo));
+    if (!pathInfo)
+    {
+        perror("Memory allocation error");
+        exit(EXIT_FAILURE);
+    }
+
+    pathInfo->absolutePath = strdup(absolutePath);
+    pathInfo->relativePath = strdup(relativePath);
+
+    return pathInfo;
+}
+
+int create_dir(const char *path)
+{
+    if (!root)
+    {
+        fprintf(stderr, "File manager is not created.\n");
+        return 0;
+    }
+
+    char *token = strdup(path);
+
+    // Проверяем, что путь является абсолютным или относительным
+    if (!is_valid_path(token))
+    {
+        fprintf(stderr, "Invalid path: %s\n", path);
+        return 0;
+    }
+
+    // Если необходимо создать корневую директорию
+    if (strcmp(path, "/") == 0)
+    {
+        fprintf(stderr, "Root directory already exists.\n");
+        return 0;
+    }
+
+    // Проверяем, что директория существует
+    char *parent_path = strdup(path);
+    char *dir_name = get_last_component(parent_path);
+
+    if (!parent_path || !dir_name)
+    {
+        free(parent_path);
+        fprintf(stderr, "Memory allocation error.\n");
+        return 0;
+    }
+
+    // Проверяем, что родительская директория существует
+    Node *parent;
+    if (!navigate_path(path, &parent) || !parent->is_dir)
+    {
+        fprintf(stderr, "Parent directory does not exist.\n");
+        return 0;
+    }
+
+    // Проверяем, что директория с указанным именем еще не существует
+    if (is_contains(parent->children, dir_name))
+    {
+        free(parent_path);
+        free(dir_name);
+        fprintf(stderr, "Directory already exists.\n");
+        return 0;
+    }
+
+    // Создаем новую директорию
+    Node *new_dir = createNode(dir_name, parent, 1); // is_dir = 1, так как создаем директорию
+    pushBack(parent->children, new_dir);
+
+    // Очищаем временные строки
+    free(parent_path);
+    free(dir_name);
+
+    return 1;
+}
+
+int is_valid_path(char *path)
+{
+    char arr[] = "!/\\,{}[]<>@#$%^&*()+|'\"?~`*+=";
+    if (!path || strlen(path) > 32 || !strcmp(path, "") || (*path == '.' && path[strlen(path) - 1] == '.'))
+        return 0;
+    for (size_t i = 0; i != strlen(arr); ++i)
+    {
+        if (strchr(path, arr[i]))
             return 0;
-    var_m.disk_space--;
+    }
+    return 1;
+}
 
-    fprintf(stdout, "Disk space after creating new folder: %d\n", var_m.disk_space);
-    return 2;
+char *get_last_component(const char *path)
+{
+    char *token = strdup(path);
+    if (!path || !is_valid_path(token))
+    {
+        return NULL;
+    }
+
+    size_t path_len = strlen(path);
+
+    if (path_len == 0)
+    {
+        return NULL;
+    }
+
+    // Ищем последний слеш в пути
+    const char *last_slash = strrchr(path, '/');
+
+    if (!last_slash) // Если слеш не найден, возвращаем копию всего пути
+    {
+        return strdup(path);
+    }
+
+    // Индекс начала последнего компонента
+    size_t start_index = last_slash - path + 1;
+
+    // Выделяем память под последний компонент
+    char *last_component = (char *)malloc(path_len - start_index + 1);
+
+    if (!last_component)
+    {
+        perror("Memory allocation error");
+        exit(EXIT_FAILURE);
+    }
+
+    // Копируем последний компонент в выделенную память
+    strcpy(last_component, path + start_index);
+
+    return last_component;
+}
+
+int navigate_path(const char *path, Node **result_node)
+{
+    char *token = strdup(path);
+    if (!token || !is_valid_path(token))
+    {
+        free(token);
+        return 0;
+    }
+
+    char *last_component = get_last_component(token);
+    if (!last_component)
+    {
+        free(token);
+        return 0;
+    }
+
+    Node *child = find_child_by_name(cur_dir, last_component);
+
+    // Освобождаем память, выделенную для last_component и token
+    free(last_component);
+    free(token);
+
+    if (child && result_node)
+    {
+        *result_node = child;
+        return 1;
+    }
+
+    return 0;
+}
+
+Node *find_child_by_name(Node *parent, const char *name)
+{
+    if (!parent || !name)
+    {
+        return NULL;
+    }
+
+    Node *current = parent->children->head;
+
+    while (current)
+    {
+        if (strcmp(current->name, name) == 0)
+        {
+            return current;
+        }
+        current = current->next;
+    }
+
+    return NULL;
+}
+
+int is_contains(LinkedList *children, const char *name)
+{
+    if (!children || !name)
+    {
+        return 0;
+    }
+
+    Node *iter = children->head;
+    while (iter)
+    {
+        if (strcmp(iter->name, name) == 0)
+        {
+            return 1; // Узел с указанным именем найден
+        }
+        iter = iter->next;
+    }
+
+    return 0; // Узел с указанным именем не найден
+}
+
+Node *createNode(const char *name, int is_dir)
+{
+    Node *node = (Node *)malloc(sizeof(Node));
+    if (!node)
+    {
+        perror("Memory allocation error");
+        return NULL;
+    }
+
+    node->name = strdup(name);
+    if (!node->name)
+    {
+        perror("Memory allocation error");
+        free(node);
+        return NULL;
+    }
+
+    node->is_dir = is_dir;
+    node->parent = NULL;
+    node->children = createLinkedList();
+    node->next = NULL;
+    node->pathInfo = NULL; // Не забудьте про пути
+
+    return node;
 }
 
 int ptr_destroy()
 {
     if (root)
     {
-        // Incorrect memory clearing. Need to fix it
-        //  free(root->file->relative_path);
-        free(root->children->previous);
-        free(root->children->next);
-        free(root->children);
-        // free(root->file->cur_path);
-        free(root->file);
-        free(root);
-        var_m.c_children = 0;
-        var_m.disk_space = 0;
+        deleteNode(root); // Удаляем все узлы и подчищаем память
+        root = NULL;
+        cur_dir = NULL;
         return 1;
     }
     return 0;
 }
-//===================================================================
 
-//=================[ Realization of additional functions ]=================
-
-void Create_node(int disk_size)
+void deleteNode(Node *node)
 {
-    root = (node_manager *)malloc(sizeof(node_manager));
-    root->file = (node_files *)malloc(sizeof(node_files));
-    root->children = (node_manager *)malloc(sizeof(node_manager));
-    root->children->next = (node_manager *)malloc(sizeof(node_manager));
-    root->children->previous = (node_manager *)malloc(sizeof(node_manager));
-    if (root)
+    if (!node)
     {
-        Def_initVariables(disk_size);
-    }
-    else
-        perror("Error with memory");
-}
-
-void Def_initVariables(int disk_size)
-{
-    var_m.c_children = 0;
-
-    // node_m->file->absolute_path = strdup("/");
-    // node_m->file->relative_path = node_m->file->absolute_path;
-    // node_m->file->cur_path = node_m->file->relative_path;
-
-    root->children[var_m.c_children].next = NULL;
-    root->children[var_m.c_children].previous = NULL;
-    root->children[var_m.c_children].cur_path = strdup("/");
-
-    var_m.disk_space = disk_size;
-
-    fprintf(stdout, "%d\n", var_m.disk_space);
-}
-
-int Check_operation(char *path, )
-{
-}
-
-void Add_child(const char *path)
-{
-}
-
-node_manager *new_node(char name)
-{
-    node_manager *new_node = (node_manager *)malloc(sizeof(node_manager));
-
-    if (new_node)
-    {
-        new_node->children[0].next = NULL;
-        new_node->children[0].previous = root->children.new_node->data = data;
+        return;
     }
 
-    return new_node;
+    while (node->children->size > 0)
+    {
+        Node *child = popFront(node->children);
+        deleteNode(child); // Рекурсивно удаляем потомков
+    }
+
+    freePathInfo(node->pathInfo);
+    freeLinkedList(node->children);
+    free(node->name);
+    free(node);
 }
 
-int valid_path(const char *path, const char *name)
+void freePathInfo(PathInfo *pathInfo)
 {
-    if (path[0] == '/')
+    if (pathInfo)
     {
-        for (; root != NULL; root = root->children->next)
-        {                         // scan the siblings' list
-            if (root->child == name) // test the current node
-                return 1;      // return it if the value found
-
-            if (root->child != NULL)
-            { // scan a subtree
-                valid_path(root->child->, key);
-                if (result)        // the value found in a subtree
-                    return result; // abandon scanning, return the node found
-            }
-        }
-        return 0; // key not found
+        free(pathInfo->absolutePath);
+        free(pathInfo->relativePath);
+        free(pathInfo);
     }
 }
 
-int valid_name(const char *name)
+void freeLinkedList(LinkedList *list)
 {
-    if ((strlen(name) > VALUE_MAX_LENGTH) || !strcmp(name, ".") || !strcmp(name, "..") || (name[0] == '.') ||
-        !strcmp(name, "") || !name)
-        return 0;
-
-    char bad_chars[] = "!#$%&\'()*+,-/:;<=>?@[\\]^`{|}~";
-
-    for (int i = 0; i < strlen(bad_chars); i++)
-        if (strchr(name, bad_chars[i]) != NULL)
-            return 0;
-
-    return 1;
+    Node *current = list->head;
+    while (current)
+    {
+        Node *next = current->next;
+        freeNode(current);
+        current = next;
+    }
+    free(list);
 }
 
-//=========================================================================
+void freeNode(Node *node)
+{
+    freePathInfo(node->pathInfo);
+    free(node->name);
+    free(node);
+}
 
-/*
-
-int count = 0;
-    var_m.c_children++;
-    char *rest = strdup(path);
-    char *token = strtok(rest, "/");
-    // Test function. Need to rewrite
-    if (path[0] == '/')
+Node *popFront(LinkedList *list)
+{
+    if (list->size == 0)
     {
-        while (token != NULL)
-        {
-            count++;
-            fprintf(stdout, "%s\n", token);
-            token = strtok(NULL, "/");
-        }
-    }
-    else
-    {
-        while (token != NULL)
-        {
-            count++;
-            root->children->child[0] = (char *)malloc(sizeof(char) * strlen(token) + 1);
-            root->children[0].child[0] = strdup(token);
-            root.token = strtok(NULL, "/");
-        }
+        return NULL;
     }
 
-    fprintf(stdout, "%d\n", count);
-    free(rest);*/
+    Node *node = list->head;
+
+    list->head = node->next;
+    if (list->head == NULL)
+    {
+        // Если убрали последний элемент, обновляем tail
+        list->tail = NULL;
+    }
+
+    list->size--;
+
+    return node;
+}
