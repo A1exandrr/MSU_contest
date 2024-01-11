@@ -1,165 +1,130 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-struct node {
+typedef struct NestedNode
+{
     int data;
-    struct node * prev;
-    struct node * next;
-}*head, *last;
+    struct NestedNode *prev;
+    struct NestedNode *next;
+    char *absolutePath; // Абсолютный путь
+    char *relativePath; // Относительный путь
+} NestedNode;
 
+typedef struct MainNode
+{
+    int data;
+    struct MainNode *prev;
+    struct MainNode *next;
+    NestedNode *nestedList;
+    char *absolutePath; // Абсолютный путь
+    char *relativePath; // Относительный путь
+} MainNode;
 
-/*
- * Function used in this program 
- */
-void createList(int n);
-void displayListFromFirst();
-void displayListFromEnd();
+NestedNode *createNestedNode(int data, const char *absolutePath, const char *relativePath)
+{
+    NestedNode *newNode = (NestedNode *)malloc(sizeof(NestedNode));
+    if (newNode == NULL)
+    {
+        fprintf(stderr, "Ошибка выделения памяти для вложенного узла\n");
+        exit(EXIT_FAILURE);
+    }
+    newNode->data = data;
+    newNode->prev = NULL;
+    newNode->next = NULL;
+    newNode->absolutePath = strdup(absolutePath); // Копирование абсолютного пути
+    newNode->relativePath = strdup(relativePath); // Копирование относительного пути
+    return newNode;
+}
 
+MainNode *createMainNode(int data, const char *absolutePath, const char *relativePath)
+{
+    MainNode *newNode = (MainNode *)malloc(sizeof(MainNode));
+    if (newNode == NULL)
+    {
+        fprintf(stderr, "Ошибка выделения памяти для основного узла\n");
+        exit(EXIT_FAILURE);
+    }
+    newNode->data = data;
+    newNode->prev = NULL;
+    newNode->next = NULL;
+    newNode->nestedList = NULL;
+    newNode->absolutePath = strdup(absolutePath); // Копирование абсолютного пути
+    newNode->relativePath = strdup(relativePath); // Копирование относительного пути
+    return newNode;
+}
+
+void addToNestedList(NestedNode **head, int data, const char *absolutePath, const char *relativePath)
+{
+    NestedNode *newNode = createNestedNode(data, absolutePath, relativePath);
+    if (*head == NULL)
+    {
+        *head = newNode;
+    }
+    else
+    {
+        newNode->next = *head;
+        (*head)->prev = newNode;
+        *head = newNode;
+    }
+}
+
+void addToMainList(MainNode **head, int data, const char *absolutePath, const char *relativePath)
+{
+    MainNode *newNode = createMainNode(data, absolutePath, relativePath);
+    if (*head == NULL)
+    {
+        *head = newNode;
+    }
+    else
+    {
+        newNode->next = *head;
+        (*head)->prev = newNode;
+        *head = newNode;
+    }
+}
+
+void printNestedList(NestedNode *head)
+{
+    NestedNode *current = head;
+    while (current != NULL)
+    {
+        printf("%d - Absolute Path: %s, Relative Path: %s\n", current->data, current->absolutePath,
+               current->relativePath);
+        current = current->next;
+    }
+    printf("\n");
+}
+
+void printMainList(MainNode *head)
+{
+    MainNode *current = head;
+    while (current != NULL)
+    {
+        printf("Main Node: %d - Absolute Path: %s, Relative Path: %s\n", current->data, current->absolutePath,
+               current->relativePath);
+        printf("Associated Nested List: ");
+        printNestedList(current->nestedList);
+        printf("\n");
+        current = current->next;
+    }
+}
 
 int main()
 {
-    int n, choice;
+    MainNode *mainList = NULL;
 
-    head = NULL;
-    last = NULL;
-    
-    printf("Enter the number of nodes you want to create: ");
-    scanf("%d", &n);
+    addToMainList(&mainList, 1, "/abs_path_1", "rel_path_1");
+    addToMainList(&mainList, 2, "/abs_path_2", "rel_path_2");
+    addToMainList(&mainList, 3, "/abs_path_3", "rel_path_3");
 
-    createList(n); // Create list of n nodes
+    addToNestedList(&(mainList->nestedList), 11, "/abs_path_11", "rel_path_11");
+    addToNestedList(&(mainList->nestedList), 12, "/abs_path_12", "rel_path_12");
+    addToNestedList(&(mainList->next->nestedList), 21, "/abs_path_21", "rel_path_21");
+    addToNestedList(&(mainList->next->nestedList), 22, "/abs_path_22", "rel_path_22");
+    addToNestedList(&(mainList->next->next->nestedList), 31, "/abs_path_31", "rel_path_31");
 
-    printf("\nPress 1 to display list from First");
-    printf("\nPress 2 to display list from End : ");
-    scanf("%d", &choice);
-
-    if(choice==1)
-    {
-        displayListFromFirst();
-    }
-    else if(choice == 2)
-    {
-        displayListFromEnd();
-    }
+    printMainList(mainList);
 
     return 0;
-}
-
-
-/**
- * Create a doubly linked list of n nodes.
- * @n Number of nodes to be created
- */
-void createList(int n)
-{
-    int i, data;
-    struct node *newNode;
-
-    if(n >= 1)
-    {
-        head = (struct node *)malloc(sizeof(struct node));
-
-        if(head != NULL)
-        {
-            printf("Enter data of 1 node: ");
-            scanf("%d", &data);
-
-            head->data = data;
-            head->prev = NULL;
-            head->next = NULL;
-
-            last = head;
-
-            /*
-             * Create rest of the n-1 nodes
-             */
-            for(i=2; i<=n; i++)
-            {
-                newNode = (struct node *)malloc(sizeof(struct node));
-
-                if(newNode != NULL)
-                {
-                    printf("Enter data of %d node: ", i);
-                    scanf("%d", &data);
-
-                    newNode->data = data;
-                    newNode->prev = last; // Link new node with the previous node
-                    newNode->next = NULL;
-
-                    last->next = newNode; // Link previous node with the new node
-                    last = newNode;          // Make new node as last/previous node
-                }
-                else
-                {
-                    printf("Unable to allocate memory.");
-                    break;
-                }
-            }
-
-            printf("\nDOUBLY LINKED LIST CREATED SUCCESSFULLY\n");
-        }
-        else
-        {
-            printf("Unable to allocate memory");
-        }
-    }
-}
-
-
-/**
- * Displays the content of the list from beginning to end
- */
-void displayListFromFirst()
-{
-    struct node * temp;
-    int n = 1;
-
-    if(head == NULL)
-    {
-        printf("List is empty.");
-    }
-    else
-    {
-        temp = head;
-        printf("\n\nDATA IN THE LIST:\n");
-
-        while(temp != NULL)
-        {
-            printf("DATA of %d node = %d\n", n, temp->data);
-
-            n++;
-            
-            /* Move the current pointer to next node */
-            temp = temp->next;
-        }
-    }
-}
-
-
-/**
- * Display the content of the list from last to first
- */
-void displayListFromEnd()
-{
-    struct node * temp;
-    int n = 0;
-
-    if(last == NULL)
-    {
-        printf("List is empty.");
-    }
-    else
-    {
-        temp = last;
-        printf("\n\nDATA IN THE LIST:\n");
-
-        while(temp != NULL)
-        {
-            printf("DATA of last-%d node = %d\n", n, temp->data);
-
-            n++;
-            
-            /* Move the current pointer to previous node */
-            temp = temp->prev; 
-        }
-    }
 }

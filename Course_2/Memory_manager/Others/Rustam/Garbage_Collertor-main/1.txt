@@ -1,0 +1,89 @@
+GLOBAL TEST 2
+
+Common memory manager test 1
+command: mm.create(1000, 2); expected: 1, passed
+command: mm.destroy(); expected: 1, passed
+command: mm.destroy(); expected: 0, passed
+command: mm.create(1000, 1); expected: 1, passed
+command: mm.create(1000, 3); expected: 0, passed
+command: mm.destroy(); expected: 1, passed
+Test 1 passed
+command: mm.create(2, 1) != 0; expected: 1, passed
+command: mm.create_object("o1"); expected: 1, passed
+command: mm.create_object("o2"); expected: 1, passed
+command: mm.destroy_object("abc"); expected: 0, passed
+command: mm.destroy_object("o1"); expected: 1, passed
+command: mm.destroy_object("o1"); expected: 0, passed
+command: mm.destroy_object("o2"); expected: 1, passed
+command: mm.create_object("o1"); expected: 1, passed
+command: mm.destroy_object("o1"); expected: 1, passed
+command: mm.create_object("o1"); expected: 1, passed
+command: mm.create_object("o1"); expected: 0, passed
+command: mm.create_object("o2"); expected: 1, passed
+command: mm.create_object("o3"); expected: 0, passed
+command: mm.destroy_object("o1"); expected: 1, passed
+command: mm.destroy(); expected: 1, passed
+Test 2 passed
+command: mm.create(10, 1) != 0; expected: 1, passed
+command: mm.create_object("o9"); expected: 1, passed
+command: mm.create_object("o1"); expected: 1, passed
+command: mm.create_object("o2"); expected: 1, passed
+command: mm.create_object("o3"); expected: 1, passed
+command: mm.create_object("o4"); expected: 1, passed
+command: mm.create_object("o5"); expected: 1, passed
+command: mm.create_object("o6"); expected: 1, passed
+command: mm.create_object("o7"); expected: 1, passed
+command: mm.create_object("o8"); expected: 1, passed
+command: mm.create_object("o0"); expected: 1, passed
+command: mm.set_root("abc"); expected: 0, passed
+command: mm.set_root("o1"); expected: 1, passed
+command: mm.set_root("o2"); expected: 1, passed
+command: mm.link("o1", "abc"); expected: 0, passed
+command: mm.link("o1", "o3"); expected: 1, passed
+command: mm.destroy_object("o1"); expected: 1, passed
+command: mm.link("o1", "o4"); expected: 0, passed
+command: mm.link("o2", "o4"); expected: 1, passed
+command: mm.link("o4", "o2"); expected: 1, passed
+command: mm.link("o5", "o6"); expected: 1, passed
+command: mm.destroy(); expected: 1, passed
+Test 3 passed
+
+
+GLOBAL TEST 3
+
+Test 1 passed
+command: mm.create(10, 1) != 0; expected: 1, passed
+command: mm.create_object("o9"); expected: 1, passed
+command: mm.create_object("o1"); expected: 1, passed
+command: mm.create_object("o2"); expected: 1, passed
+command: mm.create_object("o3"); expected: 1, passed
+command: mm.create_object("o4"); expected: 1, passed
+command: mm.create_object("o5"); expected: 1, passed
+command: mm.create_object("o6"); expected: 1, passed
+command: mm.create_object("o7"); expected: 1, passed
+command: mm.create_object("o8"); expected: 1, passed
+command: mm.create_object("o0"); expected: 1, passed
+command: mm.set_root("1234567"); expected: 0, passed
+command: mm.set_root("o1"); expected: 1, passed
+command: mm.set_root("o2"); expected: 1, passed
+command: mm.set_root("o9"); expected: 1, passed
+command: mm.link("o1", "1234567"); expected: 0, passed
+command: mm.link("o1", "o3"); expected: 1, passed
+command: mm.destroy_object("o1"); expected: 1, passed
+command: mm.link("o1", "o4"); expected: 0, passed
+command: mm.link("o2", "o4"); expected: 1, passed
+command: mm.link("o4", "o2"); expected: 1, passed
+command: mm.link("o4", "o6"); expected: 1, passed
+command: mm.link("o5", "o7"); expected: 1, passed
+command: mm.link("o7", "o1"); expected: 0, passed
+command: mm.link("o4", "o8"); expected: 1, passed
+command: mm.print_objects()
+command: mm.collect_live_objects()
+command: mm.destroy_object("o4"); expected: 1, passed
+command: mm.collect_live_objects()
+command: mm.destroy_object("o2"); expected: 1, passed
+command: mm.destroy_object("o9"); expected: 1, passed
+command: mm.print_objects()
+command: mm.collect_live_objects()
+command: mm.destroy(); expected: 1, passed
+Test 2 passed
