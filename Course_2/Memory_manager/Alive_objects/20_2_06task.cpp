@@ -214,6 +214,7 @@ void collect_live_objects(void)
             }
         }
     }
+    fprintf(stdout, "\n");
 }
 
 LinkedList *createLinkedList()
@@ -299,11 +300,6 @@ Object **sorting()
                 arr[k] = tmp;
             }
         }
-    }
-
-    for (int i = 0; i < count; i++)
-    {
-        fprintf(stdout, "%s\n", arr[i]->name);
     }
 
     return arr;
