@@ -86,10 +86,13 @@ int ptr_create(int disk_size)
 
 int ptr_create_dir(const char *path)
 {
-    
+
     if (path && manager_n)
     {
         if (path[0] == '/')
+        {
+            C
+        }
     }
     return 0;
 }
@@ -110,4 +113,25 @@ MainNode *createMainNode()
         return newNode;
     }
     return NULL;
+}
+
+int Parsing()
+{
+}
+
+int isValidPath(char *path)
+{
+    char arr[] = "!/\\,{}[]<>@#$%^&*()+|'\"?~`*+=";
+    if (!path || strlen(path) > 32 || !strcmp(path, "") || (*path == '.' && path[strlen(path) - 1] == '.'))
+    {
+        return 0;
+    }
+    for (size_t i = 0; i != strlen(arr); ++i)
+    {
+        if (strchr(path, arr[i]))
+        {
+            return 0;
+        }
+    }
+    return 1;
 }

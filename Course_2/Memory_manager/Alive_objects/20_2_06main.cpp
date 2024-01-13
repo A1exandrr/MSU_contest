@@ -80,15 +80,43 @@ int main()
     mm.link("o5", "o7");      // expected: 1, passeds
     mm.link("o7", "o1");      // expected: 0, passed
     mm.link("o4", "o8");      // expected: 1, passed
-    mm.print_objects();
+    // mm.print_objects();
     mm.collect_live_objects();
     mm.destroy_object("o4"); // expected: 1, passed
     mm.collect_live_objects();
     mm.destroy_object("o2"); // expected: 1, passed
     mm.destroy_object("o9"); // expected: 1, passed
-    mm.print_objects();
+    // mm.print_objects();
     mm.collect_live_objects();
     mm.destroy(); // expected: 1, passed
 
     return 0;
 }
+
+/*
+o0
+o2
+o3
+o4
+o5
+o6
+o7
+o8
+o9
+
+o2
+o4
+o6
+o8
+o9
+
+o2
+o9
+
+o0
+o3
+o5
+o6
+o7
+o8
+*/
