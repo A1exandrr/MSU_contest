@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
     file_manager_t fm;
     setup_file_manager(&fm);
     fprintf(stdout, "Result create: %d\n", fm.create(100));
-    // fprintf(stdout, "Result of creating folder %d\n", fm.create_dir("/Main"));
+    fprintf(stdout, "Result of creating folder %d\n", fm.create_dir("/Main"));
     // fm.create_dir("/Main/test1");
     // fm.create_dir("/Main/test1/test2");
     // fm.change_dir("/Main/test1/test2/..");

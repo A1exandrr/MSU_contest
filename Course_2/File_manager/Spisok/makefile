@@ -1,11 +1,11 @@
 #=========================================================
 # Основные флаги компиляции и запуска для работы программы
-CC       = g++
-CFLAGS   = -Wall -g
-ASan	 = -fsanitize=address
-VALGRIND-leak-check = valgrind --leak-check=full --show-leak-kinds=all
-VALGRIND-variable-null= valgrind --leak-check=full --track-origins=yes --show-reachable=yes
-RM       = rm -f
+CC       			   = g++
+CFLAGS  			   = -Wall -g
+ASan	 			   = -fsanitize=address
+VALGRIND-leak-check    = valgrind --leak-check=full --show-leak-kinds=all
+VALGRIND-variable-null = valgrind --leak-check=full --track-origins=yes --show-reachable=yes
+RM                     = rm -f
 
 # Цель по умолчанию
 default: main

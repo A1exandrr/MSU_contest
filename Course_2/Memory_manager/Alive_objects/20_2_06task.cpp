@@ -201,11 +201,12 @@ int link(const char *object1_name, const char *object2_name)
 
 void collect_live_objects(void)
 {
+    Object **loc_arr = sorting();
     for (int i = 0; i < manager_size; i++)
     {
-        if (!manager_n[i]->is_free && manager_n[i]->is_root)
+        if (!loc_arr[i]->is_free && loc_arr[i]->is_root)
         {
-            fprintf(stdout, "%s\n", manager_n[i]->name);
+            fprintf(stdout, "%s\n", loc_arr[i]->name);
             ListItem *iter = manager_n[i]->links->head;
             while (iter)
             {
